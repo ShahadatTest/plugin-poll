@@ -90,10 +90,15 @@ describe("matchChoice", () => {
 describe("the messages", () => {
   it("formats the poll so it reads in plain text, and reads it back", () => {
     expect(formatPoll(POLL)).toBe(
-      "📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\nVote in the Poll panel, or reply /vote <number>",
+      "📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\n\nVote in the Poll panel, or reply `/vote <number>`",
     );
     expect(parsePollMessage(formatPoll(POLL))).toEqual(POLL);
     // Polls posted before the footer changed still count.
+    expect(
+      parsePollMessage(
+        "📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\nVote in the Poll panel, or reply /vote <number>",
+      ),
+    ).toEqual(POLL);
     expect(
       parsePollMessage("📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\nVote with /vote <number>"),
     ).toEqual(POLL);

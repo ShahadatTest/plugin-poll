@@ -196,7 +196,7 @@ describe("poll plugin", () => {
     expect(answer.result?.message).toBe("Poll posted: Lunch?");
     expect(t.chat.messages().map((m) => [m.text, m.threadId])).toEqual([
       [
-        "📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\nVote in the Poll panel, or reply /vote <number>",
+        "📊 Poll: Lunch?\n1. Pizza\n2. Sushi\n3. Tacos\n\nVote in the Poll panel, or reply `/vote <number>`",
         null,
       ],
     ]);

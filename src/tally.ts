@@ -10,9 +10,13 @@ export const MAX_QUESTION_LENGTH = 200;
 const POLL_PREFIX = "📊 Poll: ";
 const CLOSED_PREFIX = "📊 Poll closed: ";
 const VOTE_PREFIX = "🗳️ vote: ";
-const VOTE_FOOTER = "Vote in the Poll panel, or reply /vote <number>";
-/** The footer polls were posted with before; they are still read. */
-const OLD_VOTE_FOOTER = "Vote with /vote <number>";
+/** Code-span keeps `<number>` visible in Markdown (bare `<number>` is an HTML tag). */
+const VOTE_FOOTER = "Vote in the Poll panel, or reply `/vote <number>`";
+/** Footers polls were posted with before; they are still read. */
+const LEGACY_VOTE_FOOTERS = [
+  "Vote in the Poll panel, or reply /vote <number>",
+  "Vote with /vote <number>",
+] as const;
 /** `🗳` with or without the emoji presentation selector, then `vote:`. */
 const VOTE_PATTERN = /^🗳️?\s*vote:/iu;
 /** A vote typed by hand: `/vote` and the option's number or text. */
@@ -122,11 +126,12 @@ export function matchChoice(choice: unknown, options: readonly string[]): number
   return index === -1 ? null : index;
 }
 
-/** The poll message. */
+/** The poll message. A blank line before the footer keeps it out of the last list item. */
 export function formatPoll(poll: PollText): string {
   return [
     `${POLL_PREFIX}${poll.question}`,
     ...poll.options.map((option, i) => `${i + 1}. ${option}`),
+    "",
     VOTE_FOOTER,
   ].join("\n");
 }
@@ -148,14 +153,15 @@ export function formatClosed(question: string, options: readonly OptionCount[]):
 export function parsePollMessage(text: string): PollText | null {
   const lines = text.split("\n").map((line) => line.trim());
   const footer = lines.at(-1);
-  if (
-    !lines[0]?.startsWith(POLL_PREFIX) ||
-    (footer !== VOTE_FOOTER && footer !== OLD_VOTE_FOOTER)
-  ) {
+  const knownFooter =
+    footer === VOTE_FOOTER ||
+    (footer !== undefined && (LEGACY_VOTE_FOOTERS as readonly string[]).includes(footer));
+  if (!lines[0]?.startsWith(POLL_PREFIX) || !knownFooter) {
     return null;
   }
   const question = oneLine(lines[0].slice(POLL_PREFIX.length));
-  const optionLines = lines.slice(1, -1);
+  // Drop the blank line that separates options from the footer (and any empty lines).
+  const optionLines = lines.slice(1, -1).filter((line) => line.length > 0);
   if (!question || optionLines.length < MIN_OPTIONS || optionLines.length > MAX_OPTIONS) {
     return null;
   }

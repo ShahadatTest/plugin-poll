@@ -56,7 +56,8 @@ A poll reads well without the plugin:
 1. Pizza
 2. Sushi
 3. Tacos
-Vote in the Poll panel, or reply /vote <number>
+
+Vote in the Poll panel, or reply `/vote <number>`
 ```
 
 A vote from the panel is a message `🗳️ vote: Sushi`; anyone can also type `/vote 2` or
